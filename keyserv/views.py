@@ -121,10 +121,14 @@ def modify_key(key_id: int):
 
 
 @frontend.route("/add/key", methods=["GET", "POST"])
+@frontend.route("/add/key/<int:app_id>", methods=["GET", "POST"])
 @login_required
-def add_key():
+def add_key(app_id=None):
     form = KeyForm(request.form)
     form.application.choices = [(app.id, app.name) for app in Application.query.all()]
+
+    if app_id:
+        form.application.data = app_id
 
     if request.method == "POST" and form.validate_on_submit():
         try:
