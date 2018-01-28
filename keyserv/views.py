@@ -191,7 +191,7 @@ def detail_key(key_id: int):
     return render_template("detail_key.html", key=key)
 
 
-@frontend.route("/etail/app/<int:app_id>")
+@frontend.route("/detail/app/<int:app_id>")
 @login_required
 def detail_app(app_id: int):
 
