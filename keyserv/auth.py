@@ -53,7 +53,10 @@ class Users(db.Model, UserMixin):
         return self.id
 
     def check_password(self, passwd):
-        return argon2.verify_password(self.passwd, bytes(passwd, "UTF-8"))
+        try:
+            return argon2.verify_password(self.passwd, bytes(passwd, "UTF-8"))
+        except argon2.exceptions.VerifyMismatchError:
+            return False
 
 
 @login_manager.user_loader
