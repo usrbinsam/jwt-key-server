@@ -48,7 +48,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Key</th>
             <th>Time Stamp</th>
             <th>Message</th>
@@ -58,7 +57,6 @@
     <tbody>
         {% for log in app.logs %}
         <tr>
-            <td>{{ log.id }}</td>
             <td><a href="{{ url_for('frontend.detail_key', key_id=log.key_id) }}">{{ log.key_id }}</a></td>
             <td>{{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
             <td>{{ log.message }}</td>

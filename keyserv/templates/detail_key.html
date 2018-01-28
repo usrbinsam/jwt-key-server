@@ -57,7 +57,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
             <th>Time Stamp</th>
             <th>Message</th>
             <th>Event</th>
@@ -66,7 +65,6 @@
     <tbody>
         {% for log in key.logs %}
         <tr>
-            <td>{{ log.id }}</td>
             <td>{{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
             <td>{{ log.message }}</td>
             <td>{{ log.event_type|event }}</td>
