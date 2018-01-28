@@ -32,6 +32,7 @@ db = SQLAlchemy()  # type: Any
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
+    support_message = db.Column(db.String)
 
 
 class Key(db.Model):

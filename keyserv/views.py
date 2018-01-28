@@ -145,6 +145,7 @@ def add_app():
     if request.method == "POST" and form.validate_on_submit():
         app = Application()
         app.name = form.name.data
+        app.support_message = form.support.data
 
         db.session.add(app)
         try:
@@ -168,13 +169,16 @@ def modify_app(app_id: int):
     if request.method == "POST" and form.validate_on_submit():
 
         app.name = form.name.data
+        app.support_message = form.support.data
         try:
             db.session.commit()
             flash("Success.")
+            return redirect(url_for("frontend.detail_app", app_id=app.id))
         except Exception as error:
             flash(f"Failed to modify application: {error}", "error")
 
     form.name.data = app.name
+    form.support.data = app.support_message
 
     return render_template("add_modify.html", form=form)
 

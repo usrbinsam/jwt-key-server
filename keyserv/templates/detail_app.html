@@ -40,6 +40,7 @@
             <ul class="list-group">
                 <li class="list-group-item"><b>App ID</b>: {{ app.id }}</li>
                 <li class="list-group-item"><b>Number of Keys:</b> <a href="{{ url_for('frontend.keys_for_app', app_id=app.id) }}">{{ app.keys|length }}</a></li>
+                <li class="list-group-item"><b>Support Message:</b> {{ app.support_message }}</li>
             </ul>
         </div>
 </div>

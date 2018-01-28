@@ -88,6 +88,8 @@ A response of `404` means the key does not exist. This endpoint only accepts the
 
 Arguments:
 - `token` - The token of the key to check for
+- `app_id` - Optional ID of the application attempting to activate. An app-specific support message
+will be included in the response body if the response failed.
 - `machine` - The NetBIOS or domain name of the machine
 - `user` - The name of the currently logged in user
 
@@ -99,12 +101,12 @@ by one. After activation, your application should store the token in an obscure 
 
 404 Invalid Key response:
 ```json
-{"result": "failure", "error": "invalid activation token"}
+{"result": "failure", "error": "invalid activation token", "support_message": "call 555-555-5555 for support or email support@example.com"}
 ```
 
 410 Out of Activations response:
 ```json
-{"result": "failure", "error": "key is out of activations"}
+{"result": "failure", "error": "key is out of activations", "support_message": "visit https://example.com/ for support"}
 ```
 
 201 Activation Successful response:
@@ -116,6 +118,8 @@ activations.
 
 Arguments:
 - `token` - The token of the key to check for
+- `app_id` - Optional ID of the application attempting to activate. An app-specific support message
+will be included in the response body if the response failed.
 - `machine` - The NetBIOS or domain name of the machine
 - `user` - The name of the currently logged in user
 

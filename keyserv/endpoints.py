@@ -24,6 +24,7 @@ from flask import request
 from flask_restful import Resource, Api
 from flask_restful import reqparse
 from keyserv.keymanager import Origin, key_exists_const, key_get_unsafe, activate_key_unsafe
+from keyserv.models import Application
 
 api = Api()
 
@@ -42,18 +43,30 @@ class ActivateKey(Resource):
         parser.add_argument("token", required=True)
         parser.add_argument("machine", required=True)
         parser.add_argument("user", required=True)
+        parser.add_argument("app_id")
 
         args = parser.parse_args()
 
         origin = Origin(request.remote_addr, args.machine, args.user)
 
         if not key_exists_const(args.token, origin):
-            return {"result": "failure", "error": "invalid activation token"}, 404
+
+            resp = {"result": "failure", "error": "invalid activation token",
+                    "support_message": None}
+            if args.app_id:
+                app = Application.query.get(args.app_id)
+                if app and app.support_message:
+                    resp["support_message"] = app.support_message
+
+            return resp, 404
 
         key = key_get_unsafe(args.token, origin)
 
         if key.remaining == 0:
-            return {"result": "failure", "error": "key is out of activations"}, 410
+            resp = {"result": "failure", "error": "key is out of activations",
+                    "support_message": key.app.support_message}
+
+            return resp, 410
 
         activate_key_unsafe(args.token, origin)
 

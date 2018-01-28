@@ -43,4 +43,5 @@ class KeyForm(FlaskForm):
 
 class AppForm(FlaskForm):
     name = StringField("Application Name")
+    support = StringField("Support Message")
     submit = SubmitField("Submit")
