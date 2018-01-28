@@ -99,3 +99,16 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# project specific
+keyserver/config.py
+
+# vs code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+keyserver.log*
+keyserv/config.py

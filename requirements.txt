@@ -1,0 +1,10 @@
+argon2_cffi
+flask
+flask_bootstrap
+flask_login
+flask_restful
+flask_sqlalchemy
+flask_wtf
+psycopg2
+wtforms
+uwsgi

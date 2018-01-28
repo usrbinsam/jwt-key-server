@@ -1,0 +1,70 @@
+{#
+ MIT License
+
+ Copyright(c) 2018 Samuel Hoffman
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files(the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+#}
+{% extends "layout.html" %}
+
+{% block title %}Mini Key Server - Application Detail{% endblock%}
+
+{% block container %}
+<h2>Detail for Application {{ app.name }}</h2>
+
+
+
+<div class="panel panel-primary">
+
+    <div class="panel-heading">{{ app.name }}</div>
+        <div class="panel-body">
+        <a href="{{ url_for('frontend.modify_app', app_id=app.id) }}" class="btn btn-info">
+                <span class="glyphicon glyphicon-edit"></span> Modify</a>
+        <br/><br/>
+            <ul class="list-group">
+                <li class="list-group-item"><b>App ID</b>: {{ app.id }}</li>
+                <li class="list-group-item"><b>Number of Keys:</b> <a href="{{ url_for('frontend.keys_for_app', app_id=app.id) }}">{{ app.keys|length }}</a></li>
+            </ul>
+        </div>
+</div>
+
+<h3>Audit Log</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>Time Stamp</th>
+            <th>Message</th>
+            <th>Event</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in app.logs %}
+        <tr>
+            <td>{{ log.id }}</td>
+            <td><a href="{{ url_for('frontend.detail_key', key_id=log.key_id) }}">{{ log.key_id }}</a></td>
+            <td>{{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+            <td>{{ log.message }}</td>
+            <td>{{ log.event_type|event }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{%- endblock %}
