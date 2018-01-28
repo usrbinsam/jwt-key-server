@@ -45,13 +45,13 @@ class Key(db.Model):
     enabled: if the license is able to
     """
     id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String, unique=True)
-    remaining = db.Column(db.Integer)
+    app = db.relationship("Application", uselist=False, backref="keys")
+    app_id = db.Column(db.Integer, db.ForeignKey("application.id"), nullable=False)
+    cutdate = db.Column(db.DateTime)
     enabled = db.Column(db.Boolean, default=True)
     memo = db.Column(db.String)
-    cutdate = db.Column(db.DateTime)
-    app_id = db.Column(db.Integer, db.ForeignKey("application.id"), nullable=False)
-    app = db.relationship("Application", uselist=False, backref="keys")
+    remaining = db.Column(db.Integer)
+    token = db.Column(db.String, unique=True)
 
     def __init__(self, token: str, remaining: int, app_id: int,
                  enabled: bool=True, memo: str="") -> None:
@@ -83,12 +83,12 @@ class AuditLog(db.Model):
     Database representation of an audit log.
     """
     id = db.Column(db.Integer, primary_key=True)
-    key_id = db.Column(db.Integer, db.ForeignKey("key.id"), nullable=False)
-    key = db.relationship("Key", uselist=False, backref="logs")
-    app_id = db.Column(db.Integer, db.ForeignKey("application.id"), nullable=False)
     app = db.relationship("Application", backref="logs")
-    message = db.Column(db.String)
+    app_id = db.Column(db.Integer, db.ForeignKey("application.id"), nullable=False)
     event_type = db.Column(db.Integer)
+    key = db.relationship("Key", uselist=False, backref="logs")
+    key_id = db.Column(db.Integer, db.ForeignKey("key.id"), nullable=False)
+    message = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
 
     def __init__(self, key_id: int, app_id: int, message: str, event_type: Event) -> None:
