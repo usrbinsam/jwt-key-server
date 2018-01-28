@@ -137,6 +137,10 @@ def key_exists_const(token: str, origin: Origin) -> bool:
     for key in Key.query.all():
         if compare_digest(token, key.token):
             found = True
+            key.last_check_ts = datetime.now()
+            key.last_check_ip = origin.ip
+            key.total_checks += 1
+            AuditLog.from_key(key, f"key check from {origin}", Event.KeyAccess)
     return found
 
 
@@ -179,6 +183,11 @@ def activate_key_unsafe(token: str, origin: Origin):
 
     current_app.logger.info(f"new activation: Key {key!r} from {origin}."
                             f" remaining activations: {key.remaining}")
+
+    key.total_activations += 1
+    key.last_activation_ts = datetime.now()
+    key.last_activation_ip = origin.ip
+
     AuditLog.from_key(
         key, f"new activation from {origin}", Event.AppActivation)
 

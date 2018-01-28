@@ -34,12 +34,23 @@ def format_event(value):
     return Event(value)
 
 
+def format_datetime(value):
+    if value is None:
+        return ""
+
+    try:
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return ""
+
+
 def create_app(config):
     app = Flask(__name__)
 
     app.config.from_object(__name__)
     app.config.from_object("keyserv.config.{}".format(config))
     app.jinja_env.filters["event"] = format_event
+    app.jinja_env.filters["datetime"] = format_datetime
 
     Bootstrap(app)
     api.init_app(app)

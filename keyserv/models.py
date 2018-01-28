@@ -52,6 +52,12 @@ class Key(db.Model):
     memo = db.Column(db.String)
     remaining = db.Column(db.Integer)
     token = db.Column(db.String, unique=True)
+    total_activations = db.Column(db.Integer, default=0)
+    total_checks = db.Column(db.Integer, default=0)
+    last_activation_ts = db.Column(db.DateTime)
+    last_activation_ip = db.Column(db.String)
+    last_check_ts = db.Column(db.DateTime)
+    last_check_ip = db.Column(db.String)
 
     def __init__(self, token: str, remaining: int, app_id: int,
                  enabled: bool=True, memo: str="") -> None:

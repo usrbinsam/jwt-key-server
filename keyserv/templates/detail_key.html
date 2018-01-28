@@ -43,9 +43,26 @@
                 {% else %}
                 {{ key.remaining }}
                 {% endif %}</li>
-                <li class="list-group-item"><b>Cut On:</b> {{ key.cutdate.strftime("%Y-%m-%d %H:%M:%S ") }}</li>
+                <li class="list-group-item"><b>Cut On:</b>
+                    {{ key.cutdate|datetime }}</li>
                 {% if key.memo %}
                 <li class="list-group-item"><b>Memo:</b> {{ key.memo }}</li>
+                {% endif %}
+                <li class="list-group-item"><b>Lifetime Activations:</b>
+                    {{ key.total_activations }}</li>
+
+                {% if key.last_activation_ts %}
+                <li class="list-group-item"><b>Last Activation</b> on
+                    {{ key.last_activation_ts|datetime }} from
+                    {{ key.last_activation_ip }}</li>
+                {% endif %}
+
+                <li class="list-group-item"><b>Lifetime Checks:</b> {{ key.total_checks }}</li>
+
+                {% if key.last_check_ts %}
+                <li class="list-group-item"><b>Last Check</b> on
+                    {{ key.last_check_ts|datetime }} from
+                    {{ key.last_check_ip }}</li>
                 {% endif %}
             </ul>
         </div>
@@ -63,7 +80,7 @@
     <tbody>
         {% for log in key.logs|sort(attribute='id', reverse=True) %}
         <tr>
-            <td>{{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+            <td>{{ log.timestamp|datetime }}</td>
             <td>{{ log.message }}</td>
             <td>{{ log.event_type|event }}</td>
         </tr>
