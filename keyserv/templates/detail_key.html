@@ -63,7 +63,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for log in key.logs %}
+        {% for log in key.logs|sort(attribute='id', reverse=True) %}
         <tr>
             <td>{{ log.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</td>
             <td>{{ log.message }}</td>
