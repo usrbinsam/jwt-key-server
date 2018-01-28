@@ -1,5 +1,21 @@
 # mini-key-server
 
+This web application provides a restful API for your desktop and other applications licensing needs.
+
+### Key View
+
+![key view](etc/KeyView.png)
+![key detail](etc/KeyDetail.png)
+
+### Application View
+
+![app view](etc/AppView.png)
+![app detail](etc/AppDetail.png)
+
+### API
+
+![cURL](etc/cURLExample.png)
+
 ## Requirements
 
 Aside from the python module requirements listed in [requirements.txt](requirements.txt), the following is required:
@@ -26,3 +42,4 @@ su - postgres
 createuser keyserver
 createdb -O keyserver keyserver
 ```
+
