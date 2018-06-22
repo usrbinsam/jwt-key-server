@@ -132,3 +132,16 @@ curl localhost:5001/api/activate -X POST -d token=2SZRHXZBNB3GUCHM375FTB8DJ -d m
     "remainingActivations": "9"
 }
 ```
+
+## Database Notice
+
+The database schema is likely to change as this software is still young. Appropriate `ALTER TABLE` queries will come with the commit message.
+
+## Implications
+
+- Please run this software behind HTTPS, otherwise keys can be spoofed. Use [Qualys SSL Labs](https://www.ssllabs.com/) to verify.
+- Keys can be shared between machines, if disallowing this is important to you, use a different product. I am working on a way to seed activations via a mini-key-server client library.
+
+## TODO
+
+- Client-side library (in progress)
