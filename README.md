@@ -60,7 +60,7 @@ This creates a user and password on the command line. Currently there's no user 
 in the user interface.
 
 ```sh
-export FLASK_APP=keyserv.py
+export FLASK_APP=keyserver.py
 flask create-user username password
 ```
 
