@@ -139,7 +139,7 @@ The database schema is likely to change as this software is still young. Appropr
 
 ## Implications
 
-- Please run this software behind HTTPS, otherwise keys can be spoofed. Use [Qualys SSL Labs](https://www.ssllabs.com/) to verify.
+- Please run this software behind HTTPS, otherwise keys can be spoofed. Use [Qualys SSL Labs](https://www.ssllabs.com/) to verify. I recommend setting up HTTP Public Key Pinning - otherwise a bogus CA root can be issued to also spoof an instance of your domain. Setting up HPKP is not within the scope of this project.
 - Keys can be shared between machines, if disallowing this is important to you, use a different product. I am working on a way to seed activations via a mini-key-server client library.
 
 ## TODO
