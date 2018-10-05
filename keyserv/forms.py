@@ -32,8 +32,10 @@ class LoginForm(FlaskForm):
 
 
 class KeyForm(FlaskForm):
-    activations = IntegerField("Number of Activations", [required()],
-                               render_kw={"type": "number", "min": -1, "value": 0})
+    activations = IntegerField("Number of Activations",
+                               default=0,
+                               render_kw={"type": "number", "min": -1,
+                                          "value": 0})
     application = SelectField("Application", coerce=int)
 
     active = BooleanField("Active", [required()], default=True)
