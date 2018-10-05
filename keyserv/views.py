@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import psycopg2
 from flask import (Blueprint, abort, current_app, flash, redirect,
                    render_template, request, url_for)
 from flask_login import current_user, login_required, login_user, logout_user
@@ -109,7 +108,7 @@ def modify_key(key_id: int):
             db.session.commit()
             flash("Changes successful!")
             return redirect(url_for("frontend.detail_key", key_id=key.id))
-        except psycopg2.Error as error:
+        except Exception as error:
             flash(f"Failed to update key: {error}")
 
     form.application.data = key.app_id
@@ -135,7 +134,7 @@ def add_key(app_id=None):
             token = cut_key_unsafe(form.activations.data, form.application.data,
                                    form.active.data, form.memo.data)
             flash(f"Key added! Token: {token}", "success")
-        except psycopg2.Error as error:
+        except Exception as error:
             flash(f"Unable to add key: {error}", "error")
 
     return render_template("add_modify.html", header="Add Key", form=form)
@@ -155,7 +154,7 @@ def add_app():
         try:
             db.session.commit()
             flash("Success!")
-        except psycopg2.Error as error:
+        except Exception as error:
             flash(f"Failed to add application: {error}")
 
     return render_template("add_modify.html", form=form, header="Add Application")
