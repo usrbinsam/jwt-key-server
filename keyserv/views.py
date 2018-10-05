@@ -220,3 +220,33 @@ def keys_for_app(app_id):
         abort(404)
 
     return render_template("keys.html", keys=app.keys)
+
+
+@frontend.route("/keys/deactivate/<int:key_id>")
+@login_required
+def disable_key(key_id):
+
+    key = Key.query.get(key_id)
+
+    if not key:
+        abort(404)
+
+    key.enabled = False
+    db.session.commit()
+
+    return redirect(url_for("frontend.detail_key", key_id=key_id))
+
+
+@frontend.route("/keys/activate/<int:key_id>")
+@login_required
+def enable_key(key_id):
+
+    key = Key.query.get(key_id)
+
+    if not key:
+        abort(404)
+
+    key.enabled = True
+    db.session.commit()
+
+    return redirect(url_for("frontend.detail_key", key_id=key_id))

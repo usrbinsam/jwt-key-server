@@ -34,9 +34,18 @@
         <div class="panel-body">
         <a href="{{ url_for('frontend.modify_key', key_id=key.id) }}" class="btn btn-info">
                 <span class="glyphicon glyphicon-edit"></span> Modify</a>
+        {% if key.enabled %}
+        <a href="{{ url_for('frontend.disable_key', key_id=key.id) }}" class="btn btn-danger">
+                <span class="glyphicon glyphicon-remove"></span> Deactivate
+        </a>
+        {% else %}
+        <a href="{{ url_for('frontend.enable_key', key_id=key.id) }}" class="btn btn-success">
+                <span class="glyphicon glyphicon-ok-sign"></span> Activate</a>
+        {% endif %}
         <br/><br/>
             <ul class="list-group">
                 <li class="list-group-item"><b>Token:</b> <code>{{ key.token }}</code></li>
+                <li class="list-group-item"><b>Active:</b> {{ "Yes" if key.enabled else "No" }}</li>
                 <li class="list-group-item"><b>Remaining Activations:</b>
                 {% if key.remaining == -1 %}
                 Unlimited
