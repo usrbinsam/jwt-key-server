@@ -112,3 +112,6 @@ keyserver/config.py
 
 keyserver.log*
 keyserv/config.py
+
+keyserv/keyserver.db
+app.yaml
