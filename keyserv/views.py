@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
+
 from flask import (Blueprint, abort, current_app, flash, redirect,
-                   render_template, request, url_for)
+                   render_template, request, send_from_directory, url_for)
 from flask_login import current_user, login_required, login_user, logout_user
 
 from keyserv.auth import Users
@@ -30,6 +32,13 @@ from keyserv.keymanager import cut_key_unsafe
 from keyserv.models import Application, AuditLog, Event, Key, db
 
 frontend = Blueprint("frontend", __name__)
+
+
+@frontend.route("/favicon.ico")
+def favicon():
+    return send_from_directory(os.path.join(current_app.root_path, "static"),
+                               "favicon.ico",
+                               mimetype="image/vnd.microsoft.icon")
 
 
 @frontend.route("/", methods=["GET", "POST"])
