@@ -53,7 +53,7 @@
                 <td>{{ key.id }}</td>
                 <td><code>{{ key.token }}</code></td>
                 <td> <a href="{{ url_for('frontend.detail_app', app_id=key.app.id) }}">{{ key.app.name }}</a></td>
-                <td>{% if key.active %}Yes{% else %}No{% endif %}</td>
+                <td>{% if key.enabled %}Yes{% else %}No{% endif %}</td>
                 <td>{% if key.remaining == -1 %}
                         Unlimited
                         {% else %}
