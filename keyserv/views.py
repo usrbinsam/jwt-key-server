@@ -1,11 +1,11 @@
 # MIT License
 
-# Copyright(c) 2018 Samuel Hoffman
+# Copyright (c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files(the "Software"), to deal
+# of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
@@ -92,25 +92,35 @@ def modify_key(key_id: int):
         abort(404)
 
     form = KeyForm(request.form)
-    form.application.choices = [(app.id, app.name) for app in Application.query.all()]
+    form.application.choices = [(app.id, app.name)
+                                for app in Application.query.all()]
 
     if request.method == "POST" and form.validate_on_submit():
         changes = []
 
         if key.remaining != form.activations.data:
-            changes.append(f"activations changed from {key.remaining} to {form.activations.data}")
+            changes.append(f"activations changed from {key.remaining}"
+                           f" to {form.activations.data}")
             key.remaining = form.activations.data
         if key.memo != form.memo.data:
-            changes.append(f"memo changed from {key.memo!r} to {form.memo.data!r}")
+            changes.append(f"memo changed from {key.memo!r}"
+                           f" to {form.memo.data!r}")
             key.memo = form.memo.data
         if key.app_id != form.application.data:
-            changes.append(f"app changed from {key.app} to {form.application.data}")
+            changes.append(f"app changed from {key.app} to"
+                           f" {form.application.data}")
             key.application = form.application.data
         if key.enabled != form.active.data:
-            changes.append(f"active changed from {key.enabled} to {form.active.data}")
+            changes.append(f"active changed from {key.enabled}"
+                           f" to {form.active.data}")
             key.enabled = form.active.data
+        if key.hwid != form.hwid.data:
+            changes.append(f"hwid changed from {key.hwid!r} to "
+                           f"{form.hwid.data!r}")
+            key.hwid = form.hwid.data
 
-        AuditLog.from_key(key, f"edited by {current_user.username} ({request.remote_addr}):"
+        AuditLog.from_key(key, f"edited by {current_user.username} "
+                          f"({request.remote_addr}):"
                           f" {', '.join(changes)}", Event.KeyModified)
 
         try:
@@ -124,8 +134,10 @@ def modify_key(key_id: int):
     form.active.data = key.enabled
     form.memo.data = key.memo
     form.activations.data = key.remaining
+    form.hwid.data = key.hwid
 
-    return render_template("add_modify.html", header=f"Modify Key {key.id}", form=form)
+    return render_template("add_modify.html",
+                           header=f"Modify Key {key.id}", form=form)
 
 
 @frontend.route("/add/key", methods=["GET", "POST"])
@@ -133,14 +145,16 @@ def modify_key(key_id: int):
 @login_required
 def add_key(app_id=None):
     form = KeyForm(request.form)
-    form.application.choices = [(app.id, app.name) for app in Application.query.all()]
+    form.application.choices = [(app.id, app.name)
+                                for app in Application.query.all()]
 
     if app_id:
         form.application.data = app_id
 
     if request.method == "POST" and form.validate_on_submit():
         try:
-            token = cut_key_unsafe(form.activations.data, form.application.data,
+            token = cut_key_unsafe(form.activations.data,
+                                   form.application.data,
                                    form.active.data, form.memo.data)
             flash(f"Key added! Token: {token}", "success")
         except Exception as error:
@@ -166,7 +180,8 @@ def add_app():
         except Exception as error:
             flash(f"Failed to add application: {error}")
 
-    return render_template("add_modify.html", form=form, header="Add Application")
+    return render_template("add_modify.html",
+                           form=form, header="Add Application")
 
 
 @frontend.route("/modify/app/<int:app_id>", methods=["GET", "POST"])

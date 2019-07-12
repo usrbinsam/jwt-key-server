@@ -1,16 +1,16 @@
 # MIT License
 
-# Copyright(c) 2019 Samuel Hoffman
+# Copyright (c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files(the "Software"), to deal
+# of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,6 +18,7 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 from datetime import datetime
 from enum import IntEnum
@@ -47,9 +48,10 @@ class Key(db.Model):
     app = db.relationship("Application", uselist=False, backref="keys")
     app_id = db.Column(db.Integer,
                        db.ForeignKey("application.id"), nullable=False)
-    cutdate = db.Column(db.DateTime)
+    cutdate = db.Column(db.DateTime(timezone=True))
     enabled = db.Column(db.Boolean, default=True)
     memo = db.Column(db.String)
+    hwid = db.Column(db.String, default="")
     remaining = db.Column(db.Integer)
     token = db.Column(db.String, unique=True)
     total_activations = db.Column(db.Integer, default=0)
@@ -60,12 +62,13 @@ class Key(db.Model):
     last_check_ip = db.Column(db.String)
 
     def __init__(self, token: str, remaining: int, app_id: int,
-                 enabled: bool = True, memo: str = "") -> None:
+                 enabled: bool = True, memo: str = "", hwid: str = "") -> None:
         self.token = token
         self.remaining = remaining
         self.enabled = enabled
         self.memo = memo
         self.app_id = app_id
+        self.hwid = hwid
 
     def __str__(self):
         return f"<Key({self.token})>"

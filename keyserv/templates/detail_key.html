@@ -66,6 +66,15 @@
                     {{ key.last_activation_ip }}</li>
                 {% endif %}
 
+
+                <li class="list-group-item"><b>Hardware Id</b>:
+                    {% if key.hwid %}
+                    <code>{{ key.hwid }}</code>
+                    {% else %}
+                    ⚠️ No Hardware Id ⚠️
+                    {% endif %}
+                </li>
+
                 <li class="list-group-item"><b>Lifetime Checks:</b> {{ key.total_checks }}</li>
 
                 {% if key.last_check_ts %}

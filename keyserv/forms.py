@@ -38,8 +38,9 @@ class KeyForm(FlaskForm):
                                           "value": 0})
     application = SelectField("Application", coerce=int)
 
-    active = BooleanField("Active", [required()], default=True)
+    active = BooleanField("Active", default=True)
     memo = StringField("Memo")
+    hwid = StringField("Hardware Id")
     submit = SubmitField("Submit")
 
 

@@ -1,16 +1,16 @@
 # MIT License
 
-# Copyright(c) 2019 Samuel Hoffman
+# Copyright (c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files(the "Software"), to deal
+# of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,6 +18,7 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 import secrets
 import string
@@ -45,10 +46,11 @@ class KeyNotFound(Exception):
 class Origin:
     """Origin that identifies a key action."""
 
-    def __init__(self, ip, machine, user):
+    def __init__(self, ip, machine, user, hardware_id=None):
         self.ip = ip
         self.machine = machine
         self.user = user
+        self.hwid = hardware_id
 
     def __str__(self):
         return f"IP: {self.ip}, Machine: {self.machine}, User: {self.user}"
@@ -70,10 +72,18 @@ def rand_token(length: int = 25,
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-def token_exists_unsafe(token: str) -> bool:
+def token_exists_unsafe(token: str, hwid: str = "") -> bool:
     """Check if `token` exists in the token database. Does NOT perform constant
-    time comparison."""
-    return db.session.query(exists().where(Key.token == token)).scalar()
+    time comparison. Should not be used in APIs """
+    return db.session.query(exists().where(Key.token == token)
+                                    .where(Key.hwid == hwid)).scalar()
+
+
+def token_matches_hwid(token: str, hwid: str) -> bool:
+    """Check if the supplied hwid matches the hwid on a key"""
+    k = Key.query(token=token)
+
+    return bool(_compare(hwid, k.hwid))
 
 
 def generate_token_unsafe() -> str:
@@ -99,7 +109,7 @@ def cut_key_unsafe(activations: int, app_id: int,
     """
     token = generate_token_unsafe()
     key = Key(token, activations, app_id, active, memo)
-    key.cutdate = datetime.now()
+    key.cutdate = datetime.utcnow()
 
     db.session.add(key)
     db.session.commit()
@@ -136,42 +146,63 @@ def _compare(left: str, right: str) -> int:
     return res % 1
 
 
-def key_exists_const(token: str, origin: Origin) -> bool:
+def key_exists_const(app_id: int, token: str, origin: Origin) -> bool:
     """Constant time check to see if `token` exists in the database. Compares
     against all keys even if a match is found."""
     current_app.logger.info(f"key lookup by token {token}")
     found = False
     for key in Key.query.all():
-        if compare_digest(token, key.token):
+        if (compare_digest(token, key.token) and
+                key.enabled and key.app_id == app_id):
+
             found = True
-            key.last_check_ts = datetime.now()
+            key.last_check_ts = datetime.utcnow()
             key.last_check_ip = origin.ip
             key.total_checks += 1
             AuditLog.from_key(key, f"key check from {origin}", Event.KeyAccess)
     return found
 
 
-def key_get_unsafe(token: str, origin) -> Key:
+def key_valid_const(app_id: int, token: str, origin: Origin) -> bool:
+    """Constant time check to see if `token` exists in the database. Compares
+    against all keys even if a match is found. Validates against the app id
+    and the hardware id provided."""
+    current_app.logger.info(f"key lookup by token {token} from {origin}")
+    found = False
+    for key in Key.query.all():
+        if (compare_digest(token, key.token) and
+                key.enabled and key.app_id == app_id
+                and compare_digest(origin.hwid, key.hwid)):
+
+            found = True
+            key.last_check_ts = datetime.utcnow()
+            key.last_check_ip = origin.ip
+            key.total_checks += 1
+            AuditLog.from_key(key, f"key check from {origin}", Event.KeyAccess)
+    return found
+
+def key_get_unsafe(app_id: int, token: str, origin) -> Key:
     """Get a key by its token using constant time comparison."""
 
     current_app.logger.info(f"key retreival by token {token} from {origin}")
 
-    key = Key.query.filter(Key.token == token).first()
+    key = Key.query.filter_by(app_id=app_id, token=token, enabled=True).first()
     if key:
         AuditLog.from_key(key, f"key retreival from {origin}", Event.KeyAccess)
         return key
     return None
 
 
-def activate_key_unsafe(token: str, origin: Origin):
+def activate_key_unsafe(app_id: int, token: str, origin: Origin):
     """Mark a key as activated by its token. Does not perform constant time
     comparisons.
 
     `ip`, `machine`, and `user` are of the originating activation attempt.
     """
-    key = Key.query.filter(Key.token == token).first()
+    key = Key.query.filter_by(token=token, app_id=app_id, enabled=True).first()
 
     if key.remaining == -1:
+        key.hwid = origin.hwid
         current_app.logger.info(
             f"new unlimited activation: Key {key!r} from {origin}")
         AuditLog.from_key(
@@ -195,8 +226,9 @@ def activate_key_unsafe(token: str, origin: Origin):
                             f" remaining activations: {key.remaining}")
 
     key.total_activations += 1
-    key.last_activation_ts = datetime.now()
+    key.last_activation_ts = datetime.utcnow()
     key.last_activation_ip = origin.ip
+    key.hwid = origin.hwid
 
     AuditLog.from_key(
         key, f"new activation from {origin}", Event.AppActivation)

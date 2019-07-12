@@ -1,16 +1,16 @@
 # MIT License
 
-# Copyright(c) 2018 Samuel Hoffman
+# Copyright (c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files(the "Software"), to deal
+# of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,12 +18,14 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 
 from flask import request
 from flask_restful import Api, Resource, reqparse
 
 from keyserv.keymanager import (Origin, activate_key_unsafe, key_exists_const,
-                                key_get_unsafe)
+                                key_get_unsafe, key_valid_const)
 from keyserv.models import Application
 
 api = Api()
@@ -44,13 +46,15 @@ class ActivateKey(Resource):
         parser.add_argument("token", required=True)
         parser.add_argument("machine", required=True)
         parser.add_argument("user", required=True)
-        parser.add_argument("app_id")
+        parser.add_argument("app_id", required=True, type=int)
+        parser.add_argument("hwid", required=True)
 
         args = parser.parse_args()
 
-        origin = Origin(request.remote_addr, args.machine, args.user)
+        origin = Origin(request.remote_addr, args.machine,
+                        args.user, args.hwid)
 
-        if not key_exists_const(args.token, origin):
+        if not key_exists_const(args.app_id, args.token, origin):
 
             resp = {"result": "failure", "error": "invalid activation token",
                     "support_message": None}
@@ -61,7 +65,7 @@ class ActivateKey(Resource):
 
             return resp, 404
 
-        key = key_get_unsafe(args.token, origin)
+        key = key_get_unsafe(args.app_id, args.token, origin)
 
         if key.remaining == 0:
             resp = {"result": "failure", "error": "key is out of activations",
@@ -69,7 +73,7 @@ class ActivateKey(Resource):
 
             return resp, 410
 
-        activate_key_unsafe(args.token, origin)
+        activate_key_unsafe(args.app_id, args.token, origin)
 
         return {"result": "ok",
                 "remainingActivations": str(key.remaining)}, 201
@@ -83,12 +87,15 @@ class CheckKey(Resource):
         parser.add_argument("token", required=True)
         parser.add_argument("machine", required=True)
         parser.add_argument("user", required=True)
+        parser.add_argument("hwid", required=True)
+        parser.add_argument("app_id", required=True, type=int)
 
         args = parser.parse_args()
 
-        origin = Origin(request.remote_addr, args.machine, args.user)
+        origin = Origin(request.remote_addr,
+                        args.machine, args.user, args.hwid)
 
-        if key_exists_const(args.token, origin):
+        if key_valid_const(args.app_id, args.token, origin):
             return {"result": "ok"}, 201
 
         return {"result": "failure", "error": "invalid key"}, 404

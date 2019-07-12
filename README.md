@@ -88,10 +88,11 @@ A response of `404` means the key does not exist. This endpoint only accepts the
 
 Arguments:
 - `token` - The token of the key to check for
-- `app_id` - Optional ID of the application attempting to activate. An app-specific support message
+- `app_id` - Required ID of the application attempting to activate. An app-specific support message
 will be included in the response body if the response failed.
 - `machine` - The NetBIOS or domain name of the machine
 - `user` - The name of the currently logged in user
+- `hwid` - The same `hwid` provided during /api/activate (see below)
 
 #### `/api/activate` POST
 
@@ -118,10 +119,11 @@ activations.
 
 Arguments:
 - `token` - The token of the key to check for
-- `app_id` - Optional ID of the application attempting to activate. An app-specific support message
-will be included in the response body if the response failed.
+- `app_id` - Required ID of the application attempting to activate. An app-specific support message
+will be included in the response body if the response failed. The ID is provided when an application is created
 - `machine` - The NetBIOS or domain name of the machine
 - `user` - The name of the currently logged in user
+- `hwid` - Something that identifies the machine this token is being activated on. This should not be stored on the client side but should be unique for each client and should be generated on the client machine (MAC address, etc.)
 
 Example:
 
