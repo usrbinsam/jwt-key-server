@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright(c) 2018 Samuel Hoffman
+# Copyright(c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files(the "Software"), to deal
@@ -9,8 +9,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,7 +18,6 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 from datetime import datetime
 from enum import IntEnum
@@ -46,7 +45,8 @@ class Key(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     app = db.relationship("Application", uselist=False, backref="keys")
-    app_id = db.Column(db.Integer, db.ForeignKey("application.id"), nullable=False)
+    app_id = db.Column(db.Integer,
+                       db.ForeignKey("application.id"), nullable=False)
     cutdate = db.Column(db.DateTime)
     enabled = db.Column(db.Boolean, default=True)
     memo = db.Column(db.String)
@@ -60,7 +60,7 @@ class Key(db.Model):
     last_check_ip = db.Column(db.String)
 
     def __init__(self, token: str, remaining: int, app_id: int,
-                 enabled: bool=True, memo: str="") -> None:
+                 enabled: bool = True, memo: str = "") -> None:
         self.token = token
         self.remaining = remaining
         self.enabled = enabled
@@ -97,7 +97,8 @@ class AuditLog(db.Model):
     message = db.Column(db.String)
     timestamp = db.Column(db.DateTime)
 
-    def __init__(self, key_id: int, app_id: int, message: str, event_type: Event) -> None:
+    def __init__(self, key_id: int, app_id: int,
+                 message: str, event_type: Event) -> None:
         self.key_id = key_id
         self.app_id = app_id
         self.message = message

@@ -1,6 +1,6 @@
 # MIT License
 
-# Copyright(c) 2018 Samuel Hoffman
+# Copyright(c) 2019 Samuel Hoffman
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files(the "Software"), to deal
@@ -9,8 +9,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,7 +18,6 @@
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 import secrets
 import string
@@ -33,7 +32,8 @@ from keyserv.models import AuditLog, Event, Key, db
 
 
 class ExhuastedActivations(Exception):
-    """Raised when an activation attempt is made but the remaining activations is already at 0."""
+    """Raised when an activation attempt is made but the remaining activations
+    is already at 0."""
     pass
 
 
@@ -57,7 +57,8 @@ class Origin:
         return f"<Origin({self.ip}, {self.machine}, {self.user})>"
 
 
-def rand_token(length: int = 25, chars: str = string.ascii_uppercase + string.digits) -> str:
+def rand_token(length: int = 25,
+               chars: str = string.ascii_uppercase + string.digits) -> str:
     """
     Generate a random token. Does not check for duplicates yet.
 
@@ -70,7 +71,8 @@ def rand_token(length: int = 25, chars: str = string.ascii_uppercase + string.di
 
 
 def token_exists_unsafe(token: str) -> bool:
-    """Check if `token` exists in the token database. Does NOT perform constant time comparison."""
+    """Check if `token` exists in the token database. Does NOT perform constant
+    time comparison."""
     return db.session.query(exists().where(Key.token == token)).scalar()
 
 
@@ -78,7 +80,8 @@ def generate_token_unsafe() -> str:
     """
     Generate a new token.
 
-    Does not perform constant time comparison when checking if the generated token is a duplicate.
+    Does not perform constant time comparison when checking if the generated
+    token is a duplicate.
     """
     key = rand_token()
     while token_exists_unsafe(key):
@@ -86,11 +89,13 @@ def generate_token_unsafe() -> str:
     return key
 
 
-def cut_key_unsafe(activations: int, app_id: int, active: bool = True, memo: str = "") -> str:
+def cut_key_unsafe(activations: int, app_id: int,
+                   active: bool = True, memo: str = "") -> str:
     """
     Cuts a new key and returns the activation token.
 
-    Cuts a new key with # `activations` allowed activations. -1 is considered unlimited activations.
+    Cuts a new key with # `activations` allowed activations. -1 is considered
+    unlimited activations.
     """
     token = generate_token_unsafe()
     key = Key(token, activations, app_id, active, memo)
@@ -101,8 +106,10 @@ def cut_key_unsafe(activations: int, app_id: int, active: bool = True, memo: str
 
     current_app.logger.info(
         f"cut new key {key} with {activations} activation(s), memo: {memo}")
-    AuditLog.from_key(
-        key, f"new key cut by {current_user.username} ({request.remote_addr})", Event.KeyCreated)
+    AuditLog.from_key(key,
+                      f"new key cut by {current_user.username} "
+                      f"({request.remote_addr})",
+                      Event.KeyCreated)
 
     return token
 
@@ -130,8 +137,8 @@ def _compare(left: str, right: str) -> int:
 
 
 def key_exists_const(token: str, origin: Origin) -> bool:
-    """Constant time check to see if `token` exists in the database. Compares against all keys
-    even if a match is found."""
+    """Constant time check to see if `token` exists in the database. Compares
+    against all keys even if a match is found."""
     current_app.logger.info(f"key lookup by token {token}")
     found = False
     for key in Key.query.all():
@@ -157,7 +164,8 @@ def key_get_unsafe(token: str, origin) -> Key:
 
 
 def activate_key_unsafe(token: str, origin: Origin):
-    """Mark a key as activated by its token. Does not perform constant time comparisons.
+    """Mark a key as activated by its token. Does not perform constant time
+    comparisons.
 
     `ip`, `machine`, and `user` are of the originating activation attempt.
     """
@@ -167,14 +175,16 @@ def activate_key_unsafe(token: str, origin: Origin):
         current_app.logger.info(
             f"new unlimited activation: Key {key!r} from {origin}")
         AuditLog.from_key(
-            key, f"new unlimited activation from from {origin}", Event.AppActivation)
+            key, f"new unlimited activation from from {origin}",
+            Event.AppActivation)
         return
 
     if key.remaining == 0:
         current_app.logger.info(
             f"failed activation attempt: Key {key!r} from {origin}")
         AuditLog.from_key(
-            key, f"failed activation attempt from {origin}", Event.FailedActivation)
+            key, f"failed activation attempt from {origin}",
+            Event.FailedActivation)
 
         raise ExhuastedActivations(
             f"token {token} has exhausted all remaining activations")
