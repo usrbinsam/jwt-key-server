@@ -5,6 +5,6 @@ flask_login
 flask_restful
 flask_sqlalchemy
 flask_wtf
-psycopg-binary
+psycopg2-binary
 wtforms
 uwsgi
