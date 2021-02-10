@@ -4,6 +4,11 @@
 
 This web application provides a restful API for your desktop and other applications licensing needs.
 
+### TODO
+
+[ ] Backend re-write in Go
+[ ] Frontend re-write with VueJS
+
 ### Key View
 
 ![key view](etc/KeyView.png)
