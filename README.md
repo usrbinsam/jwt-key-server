@@ -6,8 +6,8 @@ This web application provides a restful API for your desktop and other applicati
 
 ### TODO
 
-[ ] Backend re-write in Go
-[ ] Frontend re-write with VueJS
+- [ ] Backend re-write in Go
+- [ ] Frontend re-write with VueJS
 
 ### Key View
 
