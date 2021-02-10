@@ -1,5 +1,7 @@
 # mini-key-server
 
+> :star: This repo has not been maintained since 2019 but will being receiving updates again soon. :star:
+
 This web application provides a restful API for your desktop and other applications licensing needs.
 
 ### Key View
