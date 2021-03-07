@@ -6,10 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type KeyVerifierConfig struct {
-	Secret []byte
-}
-
 type KeyVerifier struct {
 	JWT string
 	DB  *gorm.DB
@@ -17,25 +13,27 @@ type KeyVerifier struct {
 
 func (v *KeyVerifier) VerifyKey() (*Key, error) {
 	key := Key{}
-	err := key.FromJWT(v.JWT, func(token *jwt.Token) (interface{}, error) {
-		f, ok := token.Header["kid"]
-
-		if !ok {
-			return nil, errors.New("kid not set on Header")
-		}
-
-		kid, ok := f.(float64)
-
-		if !ok {
-			return nil, errors.New("kid on Header is invalid data type")
-		}
-
-		return lookupKey(v.DB, uint(kid))
-	})
+	err := key.FromJWT(v.JWT, v.KeyFunc)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &key, nil
+}
+
+func (v *KeyVerifier) KeyFunc(token *jwt.Token) (interface{}, error) {
+	f, ok := token.Header["kid"]
+
+	if !ok {
+		return nil, errors.New("kid not set on Header")
+	}
+
+	kid, ok := f.(float64)
+
+	if !ok {
+		return nil, errors.New("kid on Header is invalid data type")
+	}
+
+	return lookupKey(v.DB, uint(kid))
 }
