@@ -23,7 +23,7 @@ func TestKeyVerifier(t *testing.T) {
 	key = Key{}
 	key.ID = 42
 
-	_, err := key.SetRandomSecret(32)
+	_, err := key.SetRandomSecret(64)
 
 	testDb.Create(&key)
 	testDb.Commit()

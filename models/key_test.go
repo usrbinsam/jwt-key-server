@@ -7,6 +7,7 @@ import (
 
 func TestKey(t *testing.T) {
 	k := Key{}
+	var keySize = 64
 
 	t.Run("EmptySecretBytes", func(t *testing.T) {
 		b, err := k.GetSecretBytes()
@@ -15,8 +16,8 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("SetRandomSecret", func(t *testing.T) {
-		n, err := k.SetRandomSecret(32)
+		n, err := k.SetRandomSecret(keySize)
 		assert.Nil(t, err, "failed to write key secret")
-		assert.Equal(t, n, 32, "wrote 32 byte secret")
+		assert.Equal(t, n, keySize, "wrote 32 byte secret")
 	})
 }
