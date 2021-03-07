@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 )
@@ -19,25 +18,24 @@ type KeyVerifier struct {
 func (v *KeyVerifier) VerifyKey() (*Key, error) {
 	key := Key{}
 	err := key.FromJWT(v.JWT, func(token *jwt.Token) (interface{}, error) {
+		f, ok := token.Header["kid"]
 
-		if kid, ok := token.Header["kid"]; ok {
-			var id uint
-
-			switch v := kid.(type) {
-			case float64:
-				id = uint(token.Header["kid"].(float64))
-			case int:
-				id = uint(token.Header["kid"].(int))
-			default:
-				return nil, errors.New(fmt.Sprintf("kid header incorrect type %T", v))
-			}
-
-			return lookupKey(v.DB, id)
+		if !ok {
+			return nil, errors.New("kid not set on Header")
 		}
-		return nil, errors.New("kid not in header")
+
+		kid, ok := f.(float64)
+
+		if !ok {
+			return nil, errors.New("kid on Header is invalid data type")
+		}
+
+		return lookupKey(v.DB, uint(kid))
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &key, nil
 }
