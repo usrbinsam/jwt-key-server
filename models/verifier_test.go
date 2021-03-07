@@ -28,31 +28,44 @@ func TestKeyVerifier(t *testing.T) {
 	testDb.Create(&key)
 	testDb.Commit()
 
-	assert.Nil(t, err, "key failed to WriteSecret")
+	assert.Nil(t, err, "key failed to SetRandomSecret")
 
 	// normally client side builds our JWT here
 	// JWT "claims" what key number it is
 
+	expiration := time.Now().Add(time.Second * 3).Unix()
 	claims = KeyClaims{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Second * 3).Unix(),
-		},
 		ID: key.ID,
 	}
 
+	claims.ExpiresAt = expiration
 	clientToken := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), claims)
 	clientToken.Header["kid"] = claims.ID
-	secretBytes, err := key.GetSecretBytes()
 
-	assert.Nil(t, err, "GetSecretBytes() failed")
+	// sign JWT with generated secret
+	// perhaps application loads this key from a file or Windows Registry
+	secretBytes, _ := key.GetSecretBytes()
 
-	ss, err := clientToken.SignedString(secretBytes)
+	t.Run("TestValidJWT", func(t *testing.T) {
+		ss, _ := clientToken.SignedString(secretBytes)
 
-	assert.Nil(t, err, "failed to sign JWT")
+		verifier := KeyVerifier{ss, testDb}
+		parsedKey, err = verifier.VerifyKey()
 
-	verifier := KeyVerifier{ss, testDb}
-	parsedKey, err = verifier.VerifyKey()
+		assert.Nil(t, err, "verify failed")
+		assert.Equal(t, parsedKey.ID, key.ID)
+	})
 
-	assert.Nil(t, err, "verify failed")
-	assert.Equal(t, parsedKey.ID, key.ID)
+	t.Run("TestExpiredJWT", func(t *testing.T) {
+		claims.ExpiresAt = -expiration
+		clientToken.Claims = claims
+
+		ss, _ := clientToken.SignedString(secretBytes)
+
+		verifier := KeyVerifier{ss, testDb}
+		parsedKey, err = verifier.VerifyKey()
+
+		assert.NotNil(t, err, "expired JWT should not verify")
+	})
+
 }

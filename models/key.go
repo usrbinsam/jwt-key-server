@@ -43,6 +43,17 @@ func (k *Key) FromJWT(myToken string, keyLookup jwt.Keyfunc) error {
 	token, err := jwt.ParseWithClaims(myToken, &KeyClaims{}, keyLookup)
 
 	if err != nil {
+
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+				return errors.New("JWT validation error: " + err.Error())
+			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+				return errors.New("JWT date invalid: " + err.Error())
+			} else {
+				return errors.New("unexpected error parsing JWT: " + err.Error())
+			}
+		}
+
 		return err
 	}
 
