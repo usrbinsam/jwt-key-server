@@ -41,19 +41,3 @@ func (v *KeyVerifier) VerifyKey() (*Key, error) {
 	}
 	return &key, nil
 }
-
-// Verify is used to verify that a token is valid for an application. Constant-time memory comparison is used by
-// querying the database in batches. The batch size can be configured with the Config member.
-/*func (v KeyVerifier) Verify(app *Application, token []byte) bool {
-	var keys []Key
-
-	valid := 0
-	v.Config.Db.Model(&Key{}).Where("app_id = ?", app.ID).FindInBatches(&keys, v.Config.BatchSize, func(tx *gorm.DB, batch int) error {
-		for _, k := range keys {
-			valid |= subtle.ConstantTimeCompare([]byte(k.Token), token)
-		}
-		return nil
-	})
-
-	return valid == 1
-}*/
