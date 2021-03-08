@@ -71,4 +71,17 @@ func TestKeyVerifier(t *testing.T) {
 		assert.NotNil(t, err, "expired JWT should not verify")
 	})
 
+	t.Run("TestInvalidClaims", func(t *testing.T) {
+		claims.ApplicationID = 2
+		clientToken.Claims = claims
+
+		ss, _ := clientToken.SignedString(secretBytes)
+
+		verifier := KeyVerifier{ss, testDb}
+		parsedKey, err = verifier.VerifyKey()
+
+		assert.NotNil(t, err, "VerifyKey() should error for invalid claim")
+		assert.Nil(t, parsedKey, "VerifyKey() should return nil Key on error")
+	})
+
 }
