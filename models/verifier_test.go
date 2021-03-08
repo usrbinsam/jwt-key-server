@@ -29,7 +29,9 @@ func TestKeyVerifier(t *testing.T) {
 	testDb.Commit()
 
 	// normally client side builds our JWT here
-	// JWT "claims" what key number it is
+	// JWT "claims" what key number it is and what application it is for
+	// the KeyVerifier is responsible for verifying both claims and the
+	// JWT signature.
 
 	expiration := time.Now().Add(time.Second * 3).Unix()
 	claims = KeyClaims{
