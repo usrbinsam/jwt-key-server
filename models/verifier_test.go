@@ -15,21 +15,18 @@ func init() {
 func TestKeyVerifier(t *testing.T) {
 
 	var (
-		key       Key
-		parsedKey *Key
-		claims    KeyClaims
+		key    Key
+		claims KeyClaims
 	)
 
 	key = Key{}
 	key.ID = 42
 	key.ApplicationID = 1
 
-	_, err := key.SetRandomSecret(64)
+	_, _ = key.SetRandomSecret(64)
 
 	testDb.Create(&key)
 	testDb.Commit()
-
-	assert.Nil(t, err, "SetRandomSecret() failed")
 
 	// normally client side builds our JWT here
 	// JWT "claims" what key number it is
@@ -48,13 +45,13 @@ func TestKeyVerifier(t *testing.T) {
 	// perhaps application loads this key from a file or Windows Registry
 	secretBytes, _ := key.GetSecretBytes()
 
-	t.Run("TestValidJWT", func(t *testing.T) {
+	t.Run("TestValidKey", func(t *testing.T) {
 		ss, _ := clientToken.SignedString(secretBytes)
 
 		verifier := KeyVerifier{ss, testDb}
-		parsedKey, err = verifier.VerifyKey()
+		parsedKey, err := verifier.VerifyKey()
 
-		assert.Nil(t, err, "verify failed")
+		assert.Nil(t, err, "VerifyKey() should not fail for a valid JWT and valid Claims")
 		assert.Equal(t, parsedKey.ID, key.ID)
 		assert.Equal(t, parsedKey.ApplicationID, key.ApplicationID)
 	})
@@ -66,9 +63,9 @@ func TestKeyVerifier(t *testing.T) {
 		ss, _ := clientToken.SignedString(secretBytes)
 
 		verifier := KeyVerifier{ss, testDb}
-		parsedKey, err = verifier.VerifyKey()
+		_, err := verifier.VerifyKey()
 
-		assert.NotNil(t, err, "expired JWT should not verify")
+		assert.NotNil(t, err, "VerifyKey() should fail for expired JWTs")
 	})
 
 	t.Run("TestInvalidClaims", func(t *testing.T) {
@@ -78,10 +75,8 @@ func TestKeyVerifier(t *testing.T) {
 		ss, _ := clientToken.SignedString(secretBytes)
 
 		verifier := KeyVerifier{ss, testDb}
-		parsedKey, err = verifier.VerifyKey()
+		_, err := verifier.VerifyKey()
 
 		assert.NotNil(t, err, "VerifyKey() should error for invalid claim")
-		assert.Nil(t, parsedKey, "VerifyKey() should return nil Key on error")
 	})
-
 }
