@@ -8,11 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type IKey interface {
-	ToHex() string
-	WriteSecret(size int) (int, error)
-}
-
 type Key struct {
 	gorm.Model
 	ApplicationID uint
