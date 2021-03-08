@@ -24,7 +24,7 @@ func TestUserModel(t *testing.T) {
 		assert.True(t, ok, "incorrect password")
 	})
 
-	user.Save(testDb)
+	testDb.Save(&user)
 
 	t.Run("TestUserLoaderBadPassword", func(t *testing.T) {
 		_, err := UserLoader(testDb, "sheldon", "invalid")
