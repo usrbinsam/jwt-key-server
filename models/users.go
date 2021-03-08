@@ -41,17 +41,6 @@ func (user *User) VerifyPassword(password string) (bool, error) {
 	return bcrypt.CompareHashAndPassword(b, []byte(password)) == nil, nil
 }
 
-// Save acts as an upsert, calling Create if the ID property is 0, otherwise Save.
-func (user *User) Save(db *gorm.DB) {
-	if user.ID == 0 {
-		db.Create(user)
-	} else {
-		db.Save(user)
-	}
-
-	db.Commit()
-}
-
 // UserLoader acts as a login function. Returns a user given a username and password.
 func UserLoader(db *gorm.DB, username, password string) (*User, error) {
 	var user User
