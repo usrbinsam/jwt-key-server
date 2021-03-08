@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/hex"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -9,7 +10,7 @@ import (
 type User struct {
 	gorm.Model
 	Username string `gorm:"index:uniqueIndex"` // Unique login name.
-	Password []byte `gorm:"type:char(80)"`     // Not meant to be access directly. Use SetPassword() and VerifyPassword().
+	Password string // Not meant to be access directly. Use SetPassword() and VerifyPassword().
 }
 
 // SetPassword hashes a given password using the bcrypt extension. Returns any error returned from
@@ -25,14 +26,19 @@ func (user *User) SetPassword(password string) error {
 		return err
 	}
 
-	user.Password = bytes
+	user.Password = hex.EncodeToString(bytes)
 	return nil
 }
 
 // VerifyPassword compares a given plaintext password to the hashed
 // password on the user.
-func (user *User) VerifyPassword(password string) bool {
-	return bcrypt.CompareHashAndPassword(user.Password, []byte(password)) == nil
+func (user *User) VerifyPassword(password string) (bool, error) {
+	b, err := hex.DecodeString(user.Password)
+	if err != nil {
+		return false, err
+	}
+
+	return bcrypt.CompareHashAndPassword(b, []byte(password)) == nil, nil
 }
 
 // Save acts as an upsert, calling Create if the ID property is 0, otherwise Save.
@@ -54,7 +60,13 @@ func UserLoader(db *gorm.DB, username, password string) (*User, error) {
 		return nil, errors.New("invalid username or password")
 	}
 
-	if !user.VerifyPassword(password) {
+	ok, err := user.VerifyPassword(password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
 		return nil, errors.New("invalid username or password")
 	}
 

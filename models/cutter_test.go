@@ -27,5 +27,4 @@ func TestApp(t *testing.T) {
 		assert.NotNil(t, key, "key failed to cut")
 		assert.Equal(t, uint(1), key.ApplicationID, "Key didn't set for the correct application")
 	})
-
 }

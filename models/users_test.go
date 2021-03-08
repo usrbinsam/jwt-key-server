@@ -19,7 +19,9 @@ func TestUserModel(t *testing.T) {
 	})
 
 	t.Run("TestVerifyCorrectPassword", func(t *testing.T) {
-		assert.True(t, user.VerifyPassword("password"), "incorrect password")
+		ok, err := user.VerifyPassword("password")
+		assert.Nil(t, err, "VerifyPassword() failed")
+		assert.True(t, ok, "incorrect password")
 	})
 
 	user.Save(testDb)
