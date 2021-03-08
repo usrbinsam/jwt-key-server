@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// KeyVerifier is responsible for verifying the authenticity of a given JWT and the validity of the claims within the
+// JWT. This interface should be used for verifying end-user key operations such as activation and verification.
 type KeyVerifier struct {
 	JWT string
 	DB  *gorm.DB
