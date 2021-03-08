@@ -3,14 +3,13 @@ package models
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 )
 
 type Key struct {
 	gorm.Model
-	ApplicationID uint
+	ApplicationID uint // the application this key is valid for
 	Enabled       bool
 	Memo          *string
 	HardwareID    *string
@@ -34,34 +33,6 @@ func (k *Key) GetSecretBytes() ([]byte, error) {
 	return base64.StdEncoding.DecodeString(k.Secret)
 }
 
-func (k *Key) FromJWT(myToken string, keyLookup jwt.Keyfunc) error {
-	token, err := jwt.ParseWithClaims(myToken, &KeyClaims{}, keyLookup)
-
-	if err != nil {
-
-		if ve, ok := err.(*jwt.ValidationError); ok {
-			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return errors.New("JWT validation error: " + err.Error())
-			} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
-				return errors.New("JWT date invalid: " + err.Error())
-			} else {
-				return errors.New("unexpected error parsing JWT: " + err.Error())
-			}
-		}
-
-		return err
-	}
-
-	if !token.Valid {
-		return errors.New("JWT not valid")
-	}
-
-	claims, _ := token.Claims.(*KeyClaims)
-	k.ID = claims.ID
-
-	return nil
-}
-
 func lookupKey(db *gorm.DB, keyID uint) ([]byte, error) {
 	var key Key
 	err := db.First(&key, keyID).Error
@@ -75,7 +46,8 @@ func lookupKey(db *gorm.DB, keyID uint) ([]byte, error) {
 
 type KeyClaims struct {
 	jwt.StandardClaims
-	ID uint `json:"id"`
+	ApplicationID uint `json:"application_id"` // Key.ApplicationID field
+	KeyID         uint `json:"key_id"`         // Key.ID Field
 }
 
 type KeyActivation struct {
