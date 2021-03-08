@@ -12,7 +12,6 @@ func (c KeyCutter) CutKey(app *Application) (*Key, error) {
 
 	key := Key{
 		ApplicationID: app.ID,
-		Enabled:       false,
 	}
 
 	_, err := key.SetRandomSecret(c.Config.SecretSize)
