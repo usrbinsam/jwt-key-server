@@ -74,8 +74,6 @@ func lookupKey(db *gorm.DB, keyID uint) ([]byte, error) {
 
 type KeyClaims struct {
 	jwt.StandardClaims
-	ApplicationID uint `json:"application_id"` // Key.ApplicationID field
-	KeyID         uint `json:"key_id"`         // Key.ID Field
 }
 
 type KeyActivation struct {

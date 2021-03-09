@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -35,8 +36,11 @@ func TestKeyVerifier(t *testing.T) {
 
 	expiration := time.Now().Add(time.Second * 3).Unix()
 	claims = KeyClaims{
-		KeyID:         key.ID,
-		ApplicationID: key.ApplicationID,
+		jwt.StandardClaims{
+			Audience: "1", // User ID
+			Issuer:   strconv.Itoa(int(key.ApplicationID)),
+			Subject:  strconv.Itoa(int(key.ID)),
+		},
 	}
 
 	claims.ExpiresAt = expiration
@@ -71,7 +75,7 @@ func TestKeyVerifier(t *testing.T) {
 	})
 
 	t.Run("TestInvalidClaims", func(t *testing.T) {
-		claims.ApplicationID = 2
+		claims.Issuer = "2"
 		clientToken.Claims = claims
 
 		ss, _ := clientToken.SignedString(secretBytes)

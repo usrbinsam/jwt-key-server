@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 // KeyVerifier is responsible for verifying the authenticity of a given JWT and the validity of the claims within the
@@ -23,13 +24,19 @@ func (v *KeyVerifier) VerifyKey() (*Key, error) {
 	}
 
 	key := Key{}
-	err = v.DB.Take(&key, claims.KeyID).Error
+	err = v.DB.Take(&key, claims.Subject).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	if key.ApplicationID != claims.ApplicationID {
+	appID, err := strconv.Atoi(claims.Issuer)
+
+	if err != nil {
+		return nil, errors.New("expected integer value for iss claim")
+	}
+
+	if key.ApplicationID != uint(appID) {
 		return nil, errors.New("this key is for another application")
 	}
 
