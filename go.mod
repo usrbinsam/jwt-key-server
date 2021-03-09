@@ -1,4 +1,4 @@
-module github.com/usrbinsam/mini-key-server
+module github.com/usrbinsam/jwt-key-server
 
 go 1.15
 
